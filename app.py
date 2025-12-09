@@ -52,18 +52,32 @@ def main():
         "the **history** so you can replay or download it later."
     )
 
-    init_history()
+        init_history()
     voices = get_voices()
+    pyttsx3_available = len(voices) > 0
 
-    # Sidebar: engine & settings
+    # ---------------- Sidebar: engine & settings ----------------
     st.sidebar.header("Settings")
+
+    # Build engine options based on availability
+    engine_options = []
+    if pyttsx3_available:
+        engine_options.append("Offline (pyttsx3)")
+    engine_options.append("Google TTS (gTTS)")
 
     engine_choice = st.sidebar.selectbox(
         "TTS Engine",
-        ["Offline (pyttsx3)", "Google TTS (gTTS)"],
+        engine_options,
     )
 
     engine_name = "pyttsx3" if engine_choice.startswith("Offline") else "gtts"
+
+    if not pyttsx3_available:
+        st.sidebar.warning(
+            "Offline TTS (pyttsx3) is not available on this server. "
+            "Using Google TTS (gTTS) only."
+        )
+
 
     # gTTS language & accent (only when Google TTS is selected)
     gtts_lang = "en"
