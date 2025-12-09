@@ -1,4 +1,3 @@
-# tts_engine.py
 import os
 import uuid
 import time
@@ -50,17 +49,21 @@ def list_voices():
     return voice_list
 
 
-# ---------- ENGINE IMPLEMENTATIONS ----------
+# ENGINE IMPLEMENTATIONS
 
-def _tts_pyttsx3(text: str,
-                 voice_id: str | None = None,
-                 rate: int | None = None,
-                 volume: float | None = None) -> str:
+def _tts_pyttsx3(
+    text: str,
+    voice_id: str | None = None,
+    rate: int | None = None,
+    volume: float | None = None,
+) -> str:
     """Offline TTS using pyttsx3. Raises RuntimeError if engine is unavailable."""
     try:
         engine = pyttsx3.init()
     except Exception as e:
-        raise RuntimeError("Offline TTS (pyttsx3) is not available on this server.") from e
+        raise RuntimeError(
+            "Offline TTS (pyttsx3) is not available on this server."
+        ) from e
 
     if voice_id:
         engine.setProperty("voice", voice_id)
@@ -91,6 +94,10 @@ def _tts_gtts(text: str, lang: str = "en", tld: str = "com") -> str:
     filename = f"{uuid.uuid4().hex}.mp3"
     output_path = os.path.join(AUDIO_DIR, filename)
 
+    # gTTS supports tld for accent variations, e.g.:
+    # en + co.in  -> Indian English
+    # en + co.uk  -> British English
+    # en + com.au -> Australian English
     tts = gTTS(text=text, lang=lang, tld=tld)
     tts.save(output_path)
 
@@ -118,7 +125,7 @@ def text_to_speech_file(
         return _tts_pyttsx3(text, voice_id=voice_id, rate=rate, volume=volume)
 
 
-# ---------- CLEANUP ----------
+# CLEANUP
 
 def clean_old_audio_files(max_age_minutes: int = 30) -> None:
     """Delete audio files older than max_age_minutes from AUDIO_DIR."""

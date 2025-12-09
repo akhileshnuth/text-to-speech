@@ -1,3 +1,4 @@
+# app.py
 import os
 from datetime import datetime
 
@@ -17,7 +18,7 @@ def init_history():
         st.session_state["history"] = []
 
 
-# Languages for gTTS
+# Languages for gTTS (you can extend this dict later)
 GTTs_LANG_OPTIONS = {
     "English": {"lang": "en"},
     "Hindi": {"lang": "hi"},
@@ -31,14 +32,13 @@ GTTs_LANG_OPTIONS = {
     "French": {"lang": "fr"},
 }
 
-
-# Mapping of English accents - tld for gTTS
+# Mapping of English accents -> tld for gTTS
 ENGLISH_ACCENT_TLD = {
-    "Default": "com",      # generic
-    "India": "co.in",      # Indian English
-    "US": "com",           # American English (default)
-    "UK": "co.uk",         # British English
-    "Australia": "com.au", # Australian English
+    "Default": "com",       # generic
+    "India": "co.in",       # Indian English
+    "US": "com",            # American English (default)
+    "UK": "co.uk",          # British English
+    "Australia": "com.au",  # Australian English
 }
 
 
@@ -52,7 +52,7 @@ def main():
         "the **history** so you can replay or download it later."
     )
 
-        init_history()
+    init_history()
     voices = get_voices()
     pyttsx3_available = len(voices) > 0
 
@@ -72,14 +72,13 @@ def main():
 
     engine_name = "pyttsx3" if engine_choice.startswith("Offline") else "gtts"
 
-    if not pyttsx3_available:
+    if not pyttsx3_available and engine_name == "pyttsx3":
         st.sidebar.warning(
             "Offline TTS (pyttsx3) is not available on this server. "
-            "Using Google TTS (gTTS) only."
+            "Please switch to Google TTS (gTTS)."
         )
 
-
-    # gTTS language & accent (only when Google TTS is selected)
+    # ---------- gTTS language & accent (only when Google TTS is selected) ----------
     gtts_lang = "en"
     gtts_tld = "com"
 
@@ -108,21 +107,30 @@ def main():
             "Rate, volume, and offline voice settings do not affect gTTS."
         )
 
-    # Voice selection: only for offline engine
+    # ---------- Voice selection: ONLY for offline engine ----------
     selected_voice_id = None
 
-    if engine_name == "pyttsx3":
+    if engine_name == "pyttsx3" and pyttsx3_available:
         voice_options = ["Default"] + [
             f"{v['name']} ({v['language']})" if v["language"] else v["name"]
             for v in voices
         ]
-        selected_voice_label = st.sidebar.selectbox("Voice (offline only)", voice_options)
+        selected_voice_label = st.sidebar.selectbox(
+            "Voice (offline only)", voice_options
+        )
 
         if selected_voice_label != "Default":
             index = voice_options.index(selected_voice_label) - 1
             selected_voice_id = voices[index]["id"]
+    elif engine_name == "pyttsx3":
+        st.sidebar.info(
+            "Offline voices are not available on this server. "
+            "Please use Google TTS (gTTS)."
+        )
     else:
-        st.sidebar.info("Voice selection is only available for the Offline (pyttsx3) engine.")
+        st.sidebar.info(
+            "Voice selection is only available for the Offline (pyttsx3) engine."
+        )
 
     # Speech rate + volume (only applied for pyttsx3)
     rate = st.sidebar.slider(
@@ -140,7 +148,7 @@ def main():
         step=0.1,
     )
 
-    # Main layout 
+    # ---------------- Main layout ----------------
     col_text, col_output = st.columns([2, 1])
 
     audio_path = None
@@ -189,7 +197,7 @@ def main():
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
 
-    # Current audio preview and download
+    # ---------------- Current audio preview ----------------
     with col_output:
         if audio_path and os.path.exists(audio_path):
             st.subheader("Current Audio")
@@ -204,7 +212,7 @@ def main():
                 key="download_current",
             )
 
-    # History section 
+    # ---------------- History section ----------------
     st.markdown("---")
     st.subheader("History")
 
