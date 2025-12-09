@@ -1,0 +1,26 @@
+# Python cache & bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment folder
+venv/
+env/
+.virtualenv/
+
+# Streamlit cache & session data
+.streamlit/
+
+# Audio output (generated files)
+audio/
+
+# Temporary or OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VSCode / IDE configuration
+.vscode/
+.idea/
+*.code-workspace
